@@ -1,0 +1,395 @@
+@import "tailwindcss";
+
+/* =========================
+   GLOBAL DESIGN SYSTEM
+   ========================= */
+
+:root {
+  --pido-blue: #2563eb;
+  --pido-blue-dark: #1d4ed8;
+  --pido-green: #059669;
+  --pido-slate: #0f172a;
+  --pido-text: #1e293b;
+  --pido-muted: #64748b;
+  --pido-light: #f8fafc;
+  --pido-border: #e2e8f0;
+  --pido-radius: 18px;
+  --pido-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --pido-shadow-hover: 0 18px 45px rgba(15, 23, 42, 0.14);
+}
+
+/* =========================
+   BASE
+   ========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  color: var(--pido-text);
+  background: #ffffff;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.18);
+  color: #0f172a;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  transition: all 0.25s ease;
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* =========================
+   REUSABLE CONTAINER
+   ========================= */
+
+.container-custom {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.section-padding {
+  padding-top: 96px;
+  padding-bottom: 96px;
+}
+
+/* =========================
+   TYPOGRAPHY
+   ========================= */
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.025em;
+}
+
+h1 {
+  line-height: 1.05;
+}
+
+h2 {
+  line-height: 1.15;
+}
+
+p {
+  max-width: 75ch;
+}
+
+/* =========================
+   TOP BAR
+   ========================= */
+
+.bg-gray-900 {
+  background:
+    linear-gradient(
+      135deg,
+      #020617 0%,
+      #0f172a 50%,
+      #172554 100%
+    ) !important;
+}
+
+/* =========================
+   NAVIGATION
+   ========================= */
+
+nav {
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 40;
+}
+
+nav button,
+nav a {
+  position: relative;
+}
+
+nav button:hover,
+nav a:hover {
+  transform: translateY(-1px);
+}
+
+/* =========================
+   DARK HERO SECTIONS
+   ========================= */
+
+.bg-slate-900 {
+  background-color: #0f172a;
+}
+
+/* =========================
+   LIGHT SECTIONS
+   ========================= */
+
+.bg-gray-50 {
+  background: linear-gradient(
+    180deg,
+    #f8fafc 0%,
+    #f1f5f9 100%
+  ) !important;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+
+.rounded-2xl {
+  border-radius: var(--pido-radius) !important;
+}
+
+.rounded-2xl.border,
+.rounded-2xl.shadow-sm {
+  border-color: rgba(226, 232, 240, 0.9);
+  box-shadow: var(--pido-shadow);
+}
+
+.rounded-2xl.border:hover,
+.rounded-2xl.shadow-sm:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--pido-shadow-hover);
+}
+
+/* Prevent huge layout sections from behaving like cards */
+section.rounded-2xl {
+  transform: none;
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+button {
+  border-radius: 10px;
+}
+
+button:not(.mobile-link):hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 2px;
+}
+
+/* =========================
+   BLUE ELEMENTS
+   ========================= */
+
+.text-blue-600 {
+  color: var(--pido-blue-dark) !important;
+}
+
+.text-blue-400 {
+  color: #60a5fa !important;
+}
+
+.bg-blue-600 {
+  background: linear-gradient(
+    135deg,
+    var(--pido-blue),
+    var(--pido-blue-dark)
+  ) !important;
+}
+
+.hover\:bg-blue-700:hover {
+  background: var(--pido-blue-dark) !important;
+}
+
+/* =========================
+   BORDERS
+   ========================= */
+
+.border-gray-200 {
+  border-color: var(--pido-border) !important;
+}
+
+.border-gray-100 {
+  border-color: #eef2f7 !important;
+}
+
+/* =========================
+   INPUTS / SEARCH
+   ========================= */
+
+input,
+textarea,
+select {
+  border-radius: 10px;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: #cbd5e1;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--pido-blue) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+/* =========================
+   ABOUT PAGE VISUAL ENHANCEMENT
+   ========================= */
+
+main section {
+  position: relative;
+}
+
+main section::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+/* =========================
+   MOBILE MENU
+   ========================= */
+
+.mobile-link {
+  display: flex;
+  width: 100%;
+  padding: 13px 10px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #f1f5f9;
+  border-radius: 8px;
+}
+
+.mobile-link:hover {
+  color: var(--pido-blue-dark);
+  background: #eff6ff;
+  transform: none;
+}
+
+.mobile-sub-link {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  color: #64748b;
+  border-radius: 8px;
+}
+
+.mobile-sub-link:hover {
+  color: var(--pido-blue-dark);
+  background: #eff6ff;
+  transform: none;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 768px) {
+  .container-custom {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .section-padding {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 8vw, 3.5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+  }
+
+  .rounded-2xl.border:hover,
+  .rounded-2xl.shadow-sm:hover {
+    transform: none;
+  }
+}
+
+/* =========================
+   REDUCE MOTION
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
