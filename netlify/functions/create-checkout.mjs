@@ -1,15 +1,25 @@
+
 export default async (request) => {
+  // Only allow POST requests
   if (request.method !== "POST") {
     return Response.json(
       { error: "Method not allowed" },
-      { status: 405, headers: { Allow: "POST" } }
+      {
+        status: 405,
+        headers: { Allow: "POST" }
+      }
     );
   }
 
   const secretKey = process.env.CHAPA_SECRET_KEY;
+  const siteUrl = process.env.SITE_URL;
 
-  if (!secretKey) {
-    console.error("CHAPA_SECRET_KEY is missing");
+  // Check required environment variables
+  if (!secretKey || !siteUrl) {
+    console.error(
+      "Missing CHAPA_SECRET_KEY or SITE_URL environment variable"
+    );
+
     return Response.json(
       { error: "Payment service is not configured." },
       { status: 500 }
@@ -17,47 +27,66 @@ export default async (request) => {
   }
 
   try {
+    // Read request body
     const body = await request.json();
+
     const name = String(body.name ?? "").trim();
     const email = String(body.email ?? "").trim();
     const amount = Number(body.amount);
 
+    // Validate donor information and amount
     if (
       !name ||
       name.length > 120 ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
       email.length > 254 ||
-      !Number.isFinite(amount) ||
+      !Number.isSafeInteger(amount) ||
       amount < 1 ||
       amount > 1000000
     ) {
       return Response.json(
-        { error: "Enter a valid name, email, and donation amount." },
+        {
+          error:
+            "Enter a valid name, email, and whole-number donation amount."
+        },
         { status: 400 }
       );
     }
 
+    // Split donor name
     const names = name.split(/\s+/);
     const firstName = names.shift();
     const lastName = names.join(" ") || "Donor";
 
+    // Generate a unique transaction reference
     const reference =
-      "PIDO_DON_" + crypto.randomUUID().replaceAll("-", "");
+      "PIDO_DON_" +
+      crypto.randomUUID().replaceAll("-", "");
 
-    const siteUrl = process.env.SITE_URL;
+    // Build the return URL
+    let returnUrl;
 
-    if (!siteUrl) {
-      console.error("SITE_URL is missing");
+    try {
+      const baseUrl = new URL(siteUrl);
+
+      if (baseUrl.protocol !== "https:" &&
+          baseUrl.hostname !== "localhost") {
+        throw new Error("SITE_URL must use HTTPS");
+      }
+
+      returnUrl = new URL("/", baseUrl);
+      returnUrl.searchParams.set("payment", "return");
+      returnUrl.searchParams.set("reference", reference);
+    } catch {
+      console.error("Invalid SITE_URL configuration");
+
       return Response.json(
         { error: "Payment service is not configured." },
         { status: 500 }
       );
     }
 
-    const returnUrl = new URL("/", siteUrl);
-    returnUrl.searchParams.set("payment", "return");
-    returnUrl.searchParams.set("reference", reference);
-
+    // Initialize Chapa hosted checkout
     const chapaResponse = await fetch(
       "https://api.chapa.global/v2/payments/hosted",
       {
@@ -65,73 +94,104 @@ export default async (request) => {
         headers: {
           Authorization: `Bearer ${secretKey}`,
           "Content-Type": "application/json",
-          Accept: "application/json",
+          Accept: "application/json"
         },
         body: JSON.stringify({
-          amount: amount.toFixed(2),
+          amount: amount,
           currency: "ETB",
           merchant_reference: reference,
           customer: {
             first_name: firstName,
             last_name: lastName,
-            email,
+            email: email
           },
-          // Confirm return_url support with your Chapa account/API.
           return_url: returnUrl.toString(),
           meta: {
             organization: "PIDO Ethiopia",
-            purpose: "Donation",
-          },
-        }),
+            purpose: "Donation"
+          }
+        })
       }
     );
 
-    const result = await chapaResponse.json();
+    // Safely parse Chapa's response
+    let result;
 
+    try {
+      result = await chapaResponse.json();
+    } catch {
+      result = {};
+    }
+
+    // Handle Chapa API errors
     if (!chapaResponse.ok) {
       console.error(
         "Chapa checkout error:",
         chapaResponse.status,
-        result?.message ?? result?.error ?? "Unknown error"
+        result?.message ??
+          result?.error ??
+          "Unknown error"
       );
 
       return Response.json(
-        { error: "Could not create checkout. Please try again." },
+        {
+          error:
+            "Could not create checkout. Please try again."
+        },
         { status: 502 }
       );
     }
 
+    // Validate the returned checkout URL
     const checkoutUrl = result?.data?.checkout_url;
+    let parsedUrl = null;
 
-    let parsedUrl;
     try {
       parsedUrl = new URL(checkoutUrl);
     } catch {
       parsedUrl = null;
     }
 
+    const allowedHosts = [
+      "checkout.chapa.global",
+      "checkout.chapa.co"
+    ];
+
     if (
       !parsedUrl ||
       parsedUrl.protocol !== "https:" ||
-      !["checkout.chapa.global", "checkout.chapa.co"].includes(
-        parsedUrl.hostname
-      )
+      !allowedHosts.includes(parsedUrl.hostname)
     ) {
+      console.error(
+        "Chapa returned an invalid checkout URL"
+      );
+
       return Response.json(
-        { error: "Chapa returned an invalid checkout URL." },
+        {
+          error:
+            "Chapa returned an invalid checkout URL."
+        },
         { status: 502 }
       );
     }
 
+    // Return checkout details to the frontend
     return Response.json({
       checkout_url: parsedUrl.href,
-      reference,
+      reference: reference
     });
+
   } catch (error) {
-    console.error("Checkout initialization failed:", error?.message ?? error);
+    console.error(
+      "Checkout initialization failed:",
+      error?.message ?? error
+    );
 
     return Response.json(
-      { error: "Unable to start payment. Please try again." },
+      {
+        error:
+          "Unable to start payment. Please try again."
+      },
       { status: 500 }
     );
   }
